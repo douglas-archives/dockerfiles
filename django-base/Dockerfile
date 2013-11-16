@@ -9,9 +9,6 @@ FROM douglasmiranda/python-base
 
 MAINTAINER Douglas Miranda douglasmirandasilva@gmail.com
 
-# for gevent
-RUN apt-get -y install libevent-dev
-
 # for Pillow
 RUN apt-get -y install libjpeg8-dev
 # if you want support for all things:
