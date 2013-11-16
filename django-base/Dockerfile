@@ -2,7 +2,9 @@
 #
 # VERSION       1.0
 
-# use the ubuntu base image provided by dotCloud
+# more info about douglasmiranda/python-base:
+# https://index.docker.io/u/douglasmiranda/python-base/
+# https://github.com/douglasmiranda/dockerfiles/tree/master/python-base
 FROM douglasmiranda/python-base
 
 MAINTAINER Douglas Miranda douglasmirandasilva@gmail.com
