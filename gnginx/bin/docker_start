@@ -1,0 +1,7 @@
+#!/bin/bash
+MYAPP=$(docker run \
+        -v=$HOME/tmp/docker_django:/webapps/docker_django \
+        -v=$HOME/tmp/docker_django/.docker/logs:/logs \
+        -v=$HOME/tmp/docker_django/.docker/virtualenv/docker_django:/.virtualenvs/docker_django \
+        -name=gnginx-container \
+        -i -t -d -p 127.0.0.1:8000:80 douglasmiranda/gnginx /bin/bash)

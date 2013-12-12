@@ -1,0 +1,36 @@
+#!/bin/bash
+
+source /.virtualenvs/${DJANGO_PROJECT_NAME}/bin/activate
+cd webapps/${REPO_DIR_NAME}/
+
+if [[ -z ${SETTINGS_FLAVOR} ]] ; then
+    # less parameters to run on production
+    export SETTINGS_FLAVOR="production"
+fi
+
+if [[ -z ${GUNICORN_PID_FILE} ]] ; then
+    # gunicorn.conf.py
+    export GUNICORN_PID_FILE="/var/run/gunicorn.pid"
+fi
+
+if [[ -f ${GUNICORN_PID_FILE} ]] ; then
+    kill $(cat ${GUNICORN_PID_FILE});
+fi
+
+if [[ -z ${GUNICORN_CONF} ]] ; then
+    # less parameters to run on production
+    GUNICORN_CONF='--config="/etc/gunicorn/gunicorn.conf.py"'
+fi
+
+if [[ -z ${NO_GUNICORN} ]] ; then
+    NO_GUNICORN="false"
+fi
+
+if [ ${SETTINGS_FLAVOR} = "development" ] && [ ${NO_GUNICORN} = "true" ] ; then
+    python manage.py runserver 0.0.0.0:8000
+elif [ ${SETTINGS_FLAVOR} = "development" ] ; then
+    # you can set some custom settings for development env
+    gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
+elif [ ${SETTINGS_FLAVOR} = "production" ] ; then
+    gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
+fi
