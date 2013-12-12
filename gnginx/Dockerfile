@@ -29,12 +29,12 @@ RUN apt-get install -y nginx
 
 ADD etc/ /etc/
 RUN mkdir /opt/run/
-ADD bin/run_all /opt/run/
-RUN chmod +x opt/run/run_all
+ADD bin/run_app_server /opt/run/
+RUN chmod +x opt/run/run_app_server
 
 VOLUME ["/webapps"]
 VOLUME ["/logs"]
 
 # Launch the programs
-# ENTRYPOINT ["/opt/run/run_all"]
+# ENTRYPOINT ["/opt/run/run_app_server"]
 # CMD ["/usr/bin/supervisord", "-n"]
