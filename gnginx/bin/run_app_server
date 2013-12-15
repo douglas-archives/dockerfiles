@@ -35,6 +35,6 @@ if [ ${SETTINGS_FLAVOR} = "development" ] && [ ${NO_GUNICORN} = "true" ] ; then
 elif [ ${SETTINGS_FLAVOR} = "development" ] ; then
     # you can set some custom settings for development env
     exec ${VIRTUALENV_PATH}bin/gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
-elif [ ${SETTINGS_FLAVOR} = "production" ] ; then
+else
     exec ${VIRTUALENV_PATH}bin/gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
 fi
