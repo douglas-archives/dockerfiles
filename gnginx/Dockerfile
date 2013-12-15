@@ -28,13 +28,13 @@ RUN apt-get install -y vim-tiny
 RUN apt-get install -y nginx
 
 ADD etc/ /etc/
-RUN mkdir /opt/run/
+RUN mkdir -p /opt/run/
 ADD bin/run_app_server /opt/run/
-RUN chmod +x opt/run/run_app_server
+ADD bin/startup_programs /opt/run/
+RUN chmod +x opt/run/*
 
 VOLUME ["/webapps"]
 VOLUME ["/logs"]
 
-# Launch the programs
-# ENTRYPOINT ["/opt/run/run_app_server"]
-# CMD ["/usr/bin/supervisord", "-n"]
+# You may want to lauch the supervisor
+ENTRYPOINT ["/opt/run/startup_programs"]

@@ -1,25 +1,18 @@
 #!/bin/bash
 
-source /.virtualenvs/${DJANGO_PROJECT_NAME}/bin/activate
 cd webapps/${REPO_DIR_NAME}/
 
+if [[ -z ${VIRTUALENV_DIR_NAME} ]] ; then
+    export VIRTUALENV_DIR_NAME=${DJANGO_PROJECT_NAME}
+fi
+export VIRTUALENV_PATH="/.virtualenvs/${DJANGO_PROJECT_NAME}/"
+
 if [[ -z ${SETTINGS_FLAVOR} ]] ; then
-    # less parameters to run on production
     export SETTINGS_FLAVOR="production"
 fi
 
-if [[ -z ${GUNICORN_PID_FILE} ]] ; then
-    # gunicorn.conf.py
-    export GUNICORN_PID_FILE="/var/run/gunicorn.pid"
-fi
-
-if [[ -f ${GUNICORN_PID_FILE} ]] ; then
-    kill $(cat ${GUNICORN_PID_FILE});
-fi
-
 if [[ -z ${GUNICORN_CONF} ]] ; then
-    # less parameters to run on production
-    GUNICORN_CONF='--config="/etc/gunicorn/gunicorn.conf.py"'
+    GUNICORN_CONF="--config=/etc/gunicorn/gunicorn.conf.py"
 fi
 
 if [[ -z ${NO_GUNICORN} ]] ; then
@@ -27,10 +20,21 @@ if [[ -z ${NO_GUNICORN} ]] ; then
 fi
 
 if [ ${SETTINGS_FLAVOR} = "development" ] && [ ${NO_GUNICORN} = "true" ] ; then
-    python manage.py runserver 0.0.0.0:8000
+    # While gunicorn auto reload is not implemented yet..
+    # https://github.com/benoitc/gunicorn/issues/526
+    while ! ${VIRTUALENV_PATH}bin/python manage.py runserver 0.0.0.0:8000 ; do
+        # supervisor can't kill the django runserver.
+        # yes, I've tried this: https://coderwall.com/p/4tcw7w
+        kill $(ps aux | grep '[m]anage.py runserver' | awk '{print $2}')
+        # especially when a syntax error in your django app kills the proccess
+        # the supervisor give up, but this will make sure to keep trying
+        echo "starting again with: manage.py runserver"
+        sleep 2
+        exec /opt/run/run_app_server
+    done
 elif [ ${SETTINGS_FLAVOR} = "development" ] ; then
     # you can set some custom settings for development env
-    gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
+    exec ${VIRTUALENV_PATH}bin/gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
 elif [ ${SETTINGS_FLAVOR} = "production" ] ; then
-    gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
+    exec ${VIRTUALENV_PATH}bin/gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
 fi

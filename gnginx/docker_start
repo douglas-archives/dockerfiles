@@ -7,9 +7,11 @@ MYAPP=$(docker run \
         -e=DJANGO_PROJECT_NAME=docker_django \
         -e=REPO_DIR_NAME=docker_django \
         -e=SETTINGS_FLAVOR=development \
+        -e=NO_GUNICORN=true \
         -p=127.0.0.1:8000:80 \
         -i -t -d \
-        douglasmiranda/gnginx /bin/bash);
+        douglasmiranda/gnginx1 /bin/bash);
 
 printf 'Running on: %s\n' $MYAPP
-        # -e=NO_GUNICORN=true \
+
+# -e=NO_GUNICORN=true \
