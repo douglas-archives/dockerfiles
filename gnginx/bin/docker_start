@@ -1,7 +1,46 @@
 #!/bin/bash
-MYAPP=$(docker run \
-        -v=$HOME/tmp/docker_django:/webapps/docker_django \
-        -v=$HOME/tmp/docker_django/.docker/logs:/logs \
-        -v=$HOME/tmp/docker_django/.docker/virtualenv/docker_django:/.virtualenvs/docker_django \
-        -name=gnginx-container \
-        -i -t -d -p 127.0.0.1:8000:80 douglasmiranda/gnginx /bin/bash)
+REPO_DIR_NAME="docker_django"
+# docker_django/docker_django
+# Could be: <a specific repo name>/<django project name> 
+#            my-todo-list-project/django_todo_list
+PARENT_ABS_PATH=$(dirname $(pwd))
+DOCKER_FILES_DIR=".docker"
+
+VIRTUALENV_DOCKER="docker_django"
+VIRTUALENV_HOST_PATH="${PARENT_ABS_PATH}/${DOCKER_FILES_DIR}/virtualenv/docker_django"
+
+# env vars
+DJANGO_PROJECT_NAME="docker_django"
+# true or false
+# If true, will run your django app with manage.py runserver.
+# useful for real-time python code updates (dev env).
+# If false, will run with gunicorn.
+NO_GUNICORN=true
+# No need to set in production.
+SETTINGS_FLAVOR="development"
+
+# Will expose the port 80 from container and will be available on
+# 127.0.0.1:8000 in the host machine.
+PORT_MAP="127.0.0.1:8000:80"
+
+# This is the image name/UID.
+# You probably want to use a name when building a image by tagging it.
+# Example: docker build -t douglasmiranda/gnginx .
+IMAGE_NAME="douglasmiranda/gnginx"
+
+CONTAINER_ID=$(docker run \
+               -d \
+               -v=${PARENT_ABS_PATH}:/webapps/${REPO_DIR_NAME} \
+               -v=${PARENT_ABS_PATH}/${DOCKER_FILES_DIR}/logs:/logs \
+               -v=${VIRTUALENV_HOST_PATH}:/.virtualenvs/${VIRTUALENV_DOCKER} \
+               -e=DJANGO_PROJECT_NAME=${DJANGO_PROJECT_NAME} \
+               -e=REPO_DIR_NAME=${REPO_DIR_NAME} \
+               -e=SETTINGS_FLAVOR=${SETTINGS_FLAVOR} \
+               -e=NO_GUNICORN=${NO_GUNICORN} \
+               -p=${PORT_MAP} \
+               ${IMAGE_NAME}
+             );
+
+printf 'Container ID: %s\n' ${CONTAINER_ID}
+CONTAINER_IP=$(docker inspect ${CONTAINER_ID} | grep IPAddress | cut -d '"' -f 4)
+printf 'Running on: %s\n' ${CONTAINER_IP}
