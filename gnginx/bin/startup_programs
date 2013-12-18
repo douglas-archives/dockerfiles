@@ -1,2 +1,9 @@
 #!/bin/bash
-/usr/bin/supervisord -n
+if [[ -z ${SETTINGS_FLAVOR} ]] ; then
+    /usr/bin/supervisord -n
+else
+    # When dev I just want to start nginx and bash started.
+    # The webapp I'll start manually.
+    /usr/sbin/nginx
+    /bin/bash
+fi

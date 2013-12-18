@@ -16,7 +16,7 @@ DJANGO_PROJECT_NAME="docker_django"
 # useful for real-time python code updates (dev env).
 # If false, will run with gunicorn.
 NO_GUNICORN=true
-# No need to set in production.
+# No need to set in production. 
 SETTINGS_FLAVOR="development"
 
 # Will expose the port 80 from container and will be available on
@@ -37,10 +37,14 @@ CONTAINER_ID=$(docker run \
                -e=REPO_DIR_NAME=${REPO_DIR_NAME} \
                -e=SETTINGS_FLAVOR=${SETTINGS_FLAVOR} \
                -e=NO_GUNICORN=${NO_GUNICORN} \
+               -i -t \
                -p=${PORT_MAP} \
-               ${IMAGE_NAME}
+               ${IMAGE_NAME} 
              );
+CONTAINER_IP=$(docker inspect ${CONTAINER_ID} | grep IPAddress | cut -d '"' -f 4)
 
 printf 'Container ID: %s\n' ${CONTAINER_ID}
-CONTAINER_IP=$(docker inspect ${CONTAINER_ID} | grep IPAddress | cut -d '"' -f 4)
 printf 'Running on: %s\n' ${CONTAINER_IP}
+echo 'Attaching to the container.'
+
+docker attach ${CONTAINER_ID}

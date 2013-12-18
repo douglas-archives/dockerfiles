@@ -1,15 +1,11 @@
 #!/bin/bash
 
-cd webapps/${REPO_DIR_NAME}/
+cd /webapps/${REPO_DIR_NAME}/
 
 if [[ -z ${VIRTUALENV_DIR_NAME} ]] ; then
     export VIRTUALENV_DIR_NAME=${DJANGO_PROJECT_NAME}
 fi
 export VIRTUALENV_PATH="/.virtualenvs/${DJANGO_PROJECT_NAME}/"
-
-if [[ -z ${SETTINGS_FLAVOR} ]] ; then
-    export SETTINGS_FLAVOR="production"
-fi
 
 if [[ -z ${GUNICORN_CONF} ]] ; then
     GUNICORN_CONF="--config=/etc/gunicorn/gunicorn.conf.py"
@@ -19,7 +15,10 @@ if [[ -z ${NO_GUNICORN} ]] ; then
     NO_GUNICORN="false"
 fi
 
-if [ ${SETTINGS_FLAVOR} = "development" ] && [ ${NO_GUNICORN} = "true" ] ; then
+if [[ -z ${SETTINGS_FLAVOR} ]]; then
+    # PRODUCTION
+    exec ${VIRTUALENV_PATH}bin/gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
+elif [[ ${SETTINGS_FLAVOR} = "development" ]] && [[ ${NO_GUNICORN} = "true" ]] ; then
     # While gunicorn auto reload is not implemented yet..
     # https://github.com/benoitc/gunicorn/issues/526
     while ! ${VIRTUALENV_PATH}bin/python manage.py runserver 0.0.0.0:8000 ; do
@@ -34,7 +33,5 @@ if [ ${SETTINGS_FLAVOR} = "development" ] && [ ${NO_GUNICORN} = "true" ] ; then
     done
 elif [ ${SETTINGS_FLAVOR} = "development" ] ; then
     # you can set some custom settings for development env
-    exec ${VIRTUALENV_PATH}bin/gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
-else
     exec ${VIRTUALENV_PATH}bin/gunicorn ${DJANGO_PROJECT_NAME}.wsgi:application ${GUNICORN_CONF}
 fi
