@@ -1,11 +1,8 @@
-Dockerfiles
+Read this:
 ===========
 
-You may want to know `Docker <http://www.docker.io/>`_ first.
+This is just here for history, instead go to my new /dockerfiles repository.
 
-I'll publish here some `Dockerfiles <http://docs.docker.io/en/latest/use/builder/>`_ I use when creating Docker images.
+I focus on more exotic dockerfiles.
 
-More Info
----------
-
-TODO
+https://github.com/douglasmiranda/dockerfiles
